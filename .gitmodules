@@ -1,0 +1,3 @@
+[submodule "matengine"]
+	path = matengine
+	url = git@bitbucket.org:mls-m5/matengine.git

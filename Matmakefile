@@ -1,0 +1,23 @@
+# Matmake file
+# https://github.com/mls-m5/matmake
+
+cppflags +=                 # c++ only flags
+
+config +=
+   c++17 Wall
+   debug
+
+
+main.includes +=
+    include
+    matengine/include
+    matengine/matgui/include
+
+
+main.src =
+    src/*.cpp
+    matengine/src/*.cpp
+    matengine/matgui/src/*.cpp
+
+main.libs += -lGL -lSDL2 -lSDL2_image
+
