@@ -34,7 +34,7 @@ std::unique_ptr<btRigidBody> createRigidBody(float mass,
 int main(int argc, char **argv) {
     Application app(argc, argv);
 
-    const int width = 600, height = 400;
+    const int width = 600 * 2, height = 400 * 2;
 
     Window window("Lasersköld vehicle sim", width, height);
 
@@ -101,6 +101,15 @@ int main(int argc, char **argv) {
 
     dynamicsWorld->addRigidBody(testBody2.get());
 
+    // cyl
+
+    auto cylinderShape = make_unique<btCylinderShape>(btVector3(1, 1, 1));
+    testTransform.setOrigin(btVector3(-.8f, 0, 1));
+    auto testBody3 = createRigidBody(1, cylinderShape.get());
+    testBody3->setWorldTransform(testTransform);
+
+    dynamicsWorld->addRigidBody(testBody3.get());
+
     // -------------------------------------------------
 
     auto projection =
@@ -128,6 +137,10 @@ int main(int argc, char **argv) {
 
         testBody2->getWorldTransform().getOpenGLMatrix(&transform.x1);
         sim::renderBox(transform, viewTransform, projection);
+
+        testBody3->getWorldTransform().getOpenGLMatrix(&transform.x1);
+        transform = transform * Matrixf::RotationX(pi / 2.);
+        sim::renderCylinder(transform, viewTransform, projection);
 
         groundBody->getWorldTransform().getOpenGLMatrix(&transform.x1);
         sim::renderBox(transform.scale(50, 50, 50), viewTransform, projection);
