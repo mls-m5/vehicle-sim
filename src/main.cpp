@@ -8,6 +8,7 @@
 #include "modelobject.h"
 
 #include "box.h"
+#include "cylinder.h"
 
 #include <iostream>
 
@@ -18,7 +19,7 @@ using namespace MatGui;
 int main(int argc, char **argv) {
     Application app(argc, argv);
 
-    Window window("Lasersköld vehicle sim");
+    Window window("Lasersköld vehicle sim", 640, 400);
 
     setDepthEnabled(true);
 
@@ -27,8 +28,13 @@ int main(int argc, char **argv) {
     window.frameUpdate.connect([]() {
         static double phase = 0;
         phase += .01;
-        renderBox(
+        sim::renderBox(
             Matrixf::RotationZ(phase).rotate(phase, Vec(1, 1).normalize()),
+            Matrixf(),
+            Matrixf::Scale(.5));
+
+        sim::renderCylinder(
+            Matrixf::RotationZ(phase).rotate(-phase, Vec(1, 1).normalize()),
             Matrixf(),
             Matrixf::Scale(.5));
     });

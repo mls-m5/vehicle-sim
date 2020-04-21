@@ -3,11 +3,16 @@
 #include "cylinder.h"
 
 #include "matgui/constants.h"
+#include "matgui/matgl.h"
 #include "mesh.h"
+#include "shaders.h"
 
 #include <cmath>
+#include <memory>
 
 using namespace MatGui;
+
+namespace {
 
 Mesh createCylinderMesh() {
     const unsigned numPoints = 40;
@@ -72,3 +77,64 @@ Mesh createCylinderMesh() {
 
     return mesh;
 }
+
+class CylinderModel {
+public:
+    CylinderModel() {
+        cylVao.unbind();
+    }
+
+    void render(const Matrixf &mvTransform, const Matrixf &projection) {
+        auto mvpTransform = projection * mvTransform;
+        cylVao.bind();
+        program->use();
+
+        glUniformMatrix4fv(mvpUniform, 1, false, mvpTransform);
+        glUniformMatrix4fv(mvUniform, 1, false, mvTransform);
+        glCall(glDrawElements(GL_TRIANGLES,
+                              static_cast<int>(cylMesh.indices.size()),
+                              GL_UNSIGNED_INT,
+                              nullptr));
+    }
+
+    Mesh cylMesh = createCylinderMesh();
+
+    GL::VertexArrayObject cylVao;
+    GL::VertexBufferObject cylVboPos =
+        GL::VertexBufferObject(&cylMesh.vertices.front().pos.x,
+                               cylMesh.vertices.size() * 4 * 2,
+                               0,
+                               4,
+                               8 * sizeof(float));
+
+    GL::VertexBufferObject cylVboNormals =
+        GL::VertexBufferObject(&cylMesh.vertices.front().normal.x,
+                               cylMesh.vertices.size() * 4 * 2,
+                               1,
+                               4,
+                               8 * sizeof(float));
+
+    GL::VertexBufferObject cylIndices = GL::VertexBufferObject(cylMesh.indices);
+
+    ShaderProgram *program = sim::plainShader();
+
+    int mvpUniform = program->getUniform("uMVP");
+    int mvUniform = program->getUniform("uMV");
+};
+
+std::unique_ptr<CylinderModel> cylinderModel;
+
+} // namespace
+
+namespace sim {
+void renderCylinder(const Matrixf &model,
+                    const Matrixf &view,
+                    const Matrixf &projection) {
+    if (!cylinderModel) {
+        cylinderModel = std::make_unique<CylinderModel>();
+    }
+
+    cylinderModel->render(view * model, projection);
+}
+
+} // namespace sim

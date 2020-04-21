@@ -3,8 +3,10 @@
 #pragma once
 
 #include "matrix.h"
-#include "mesh.h"
+
+namespace sim {
 
 void renderBox(const Matrixf &model,
                const Matrixf &view,
                const Matrixf &projection);
+}

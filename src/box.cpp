@@ -2,6 +2,7 @@
 
 #include "box.h"
 #include "matgui/matgl.h"
+#include "mesh.h"
 #include "shaders.h"
 
 #include <memory>
@@ -57,16 +58,13 @@ Mesh createBoxMesh() {
 
 class BoxModel {
 public:
-    BoxModel() {
-    }
-
     void render(const Matrixf &mvTransform, const Matrixf &projection) {
         auto mvpTransform = projection * mvTransform;
 
         boxVao.bind();
         program->use();
-        glUniformMatrix4fv(MVPuniform, 1, false, mvpTransform);
-        glUniformMatrix4fv(MVuniform, 1, false, mvTransform);
+        glUniformMatrix4fv(mvpUniform, 1, false, mvpTransform);
+        glUniformMatrix4fv(mvUniform, 1, false, mvTransform);
         glCall(glDrawElements(GL_TRIANGLES,
                               static_cast<int>(boxMesh.indices.size()),
                               GL_UNSIGNED_INT,
@@ -95,8 +93,8 @@ public:
 
     ShaderProgram *program = sim::plainShader();
 
-    int MVPuniform = program->getUniform("uMVP");
-    int MVuniform = program->getUniform("uMV");
+    int mvpUniform = program->getUniform("uMVP");
+    int mvUniform = program->getUniform("uMV");
 
     Matrixf location;
 };
@@ -104,6 +102,8 @@ public:
 std::unique_ptr<BoxModel> boxModel;
 
 } // namespace
+
+namespace sim {
 
 void renderBox(const Matrixf &model,
                const Matrixf &view,
@@ -115,3 +115,5 @@ void renderBox(const Matrixf &model,
 
     boxModel->render(view * model, projection);
 }
+
+} // namespace sim

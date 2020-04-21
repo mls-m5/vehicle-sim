@@ -1,5 +1,10 @@
 // Copyright © Mattias Larsson Sköld 2020
 
-#include "mesh.h"
+#include "matrix.h"
 
-Mesh createCylinderMesh();
+namespace sim {
+
+void renderCylinder(const Matrixf &model,
+                    const Matrixf &view,
+                    const Matrixf &projection);
+}
