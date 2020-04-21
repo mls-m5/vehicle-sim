@@ -1,7 +1,23 @@
 # Matmake file
 # https://github.com/mls-m5/matmake
 
-cppflags +=                 # c++ only flags
+define += USE_DOUBLE_PRECISION
+
+// ------- Bullet physics ------------------------------------
+
+bullet.includes =
+    bullet3/src
+
+bullet.src =
+    bullet3/src/btBulletCollisionAll.cpp
+    bullet3/src/btBulletDynamicsAll.cpp
+    bullet3/src/btLinearMathAll.cpp
+
+bullet.out = shared bullet
+
+bullet.flags = -w
+
+// --------- Main program ------------------------------------
 
 config +=
    c++17 Wall
@@ -12,12 +28,16 @@ main.includes +=
     include
     matengine/include
     matengine/matgui/include
+    bullet3/src
 
 
 main.src =
     src/*.cpp
     matengine/src/*.cpp
     matengine/matgui/src/*.cpp
+    bullet3/src/LinearMath/**.cpp
+
+main.link = bullet
 
 main.libs += -lGL -lSDL2 -lSDL2_image
 

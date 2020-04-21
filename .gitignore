@@ -3,3 +3,4 @@
 *.d
 .vehicle-sim*
 main
+*.so

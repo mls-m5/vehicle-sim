@@ -1,5 +1,8 @@
 //! Copyright © Mattias Larsson Sköld
 
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
+
 #include "matgui/application.h"
 #include "matgui/draw.h"
 #include "matgui/window.h"
@@ -24,6 +27,12 @@ int main(int argc, char **argv) {
     setDepthEnabled(true);
 
     Application::ContinuousUpdates(true);
+
+    // ---------------- physics ------------------------
+
+    auto dispatcher = make_unique<btDefaultCollisionConfiguration>();
+
+    // -------------------------------------------------
 
     window.frameUpdate.connect([]() {
         static double phase = 0;

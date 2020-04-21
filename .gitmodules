@@ -1,3 +1,6 @@
 [submodule "matengine"]
 	path = matengine
 	url = git@bitbucket.org:mls-m5/matengine.git
+[submodule "bullet3"]
+	path = bullet3
+	url = https://github.com/bulletphysics/bullet3
