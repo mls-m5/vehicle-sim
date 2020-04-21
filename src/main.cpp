@@ -110,6 +110,17 @@ int main(int argc, char **argv) {
 
     dynamicsWorld->addRigidBody(testBody3.get());
 
+    // constraint
+
+    auto constraint1 = make_unique<btHingeConstraint>(*testBody,
+                                                      *testBody2,
+                                                      btVector3(.5, 0, 0),
+                                                      btVector3(0, 0, -.5),
+                                                      btVector3(0, 1, 0),
+                                                      btVector3(0, 1, 0));
+
+    dynamicsWorld->addConstraint(constraint1.get(), true);
+
     // -------------------------------------------------
 
     auto projection =
