@@ -12,6 +12,7 @@
 
 #include "box.h"
 #include "cylinder.h"
+#include "vehicle1.h"
 
 #include <iostream>
 
@@ -19,9 +20,9 @@ using namespace std;
 using namespace Engine;
 using namespace MatGui;
 
-std::unique_ptr<btRigidBody> createRigidBody(float mass,
+std::unique_ptr<btRigidBody> createRigidBody(btScalar mass,
                                              btCollisionShape *shape) {
-    bool isDynamic = mass != 0.f;
+    bool isDynamic = mass != 0.;
 
     btVector3 localInertia(0, 0, 0);
     if (isDynamic) {
@@ -71,12 +72,14 @@ int main(int argc, char **argv) {
 
     btTransform groundTransform;
     groundTransform.setIdentity();
-    groundTransform.setOrigin(btVector3(0, 0, -70));
+    groundTransform.setOrigin(btVector3(0, 0, -50));
 
     auto groundBody = createRigidBody(0, groundShape.get());
     groundBody->setWorldTransform(groundTransform);
 
     dynamicsWorld->addRigidBody(groundBody.get());
+
+    const bool enableBasicTestShapes = false;
 
     // test shape
 
@@ -86,86 +89,114 @@ int main(int argc, char **argv) {
     testTransform.setIdentity();
 
     // rb1
-    testTransform.setOrigin(btVector3(0, 0, 0));
+    testTransform.setOrigin(btVector3(0 + 10, 0, 0));
 
     auto testBody = createRigidBody(1, testShape.get());
 
-    dynamicsWorld->addRigidBody(testBody.get());
-
     // rb2
 
-    testTransform.setOrigin(btVector3(.5f, 0, 1.f));
+    testTransform.setOrigin(btVector3(.5f + 10, 0, 1.f));
 
     auto testBody2 = createRigidBody(1, testShape.get());
     testBody2->setWorldTransform(testTransform);
 
-    dynamicsWorld->addRigidBody(testBody2.get());
-
     // cyl
 
     auto cylinderShape = make_unique<btCylinderShape>(btVector3(1, 1, 1));
-    testTransform.setOrigin(btVector3(-.8f, 0, 1));
+    testTransform.setOrigin(btVector3(-.8f + 10, 0, 1));
     auto testBody3 = createRigidBody(1, cylinderShape.get());
     testBody3->setWorldTransform(testTransform);
 
-    dynamicsWorld->addRigidBody(testBody3.get());
-
     // constraint
 
-    auto constraint1 = make_unique<btHingeConstraint>(*testBody,
-                                                      *testBody2,
-                                                      btVector3(.5, 0, 0),
-                                                      btVector3(0, 0, -.5),
-                                                      btVector3(0, 1, 0),
-                                                      btVector3(0, 1, 0));
+    if (enableBasicTestShapes) {
+        auto constraint1 = make_unique<btHingeConstraint>(*testBody,
+                                                          *testBody2,
+                                                          btVector3(.5, 0, 0),
+                                                          btVector3(0, 0, -.5),
+                                                          btVector3(0, 1, 0),
+                                                          btVector3(0, 1, 0));
 
-    dynamicsWorld->addConstraint(constraint1.get(), true);
+        constraint1->enableAngularMotor(true, 1, 10);
+
+        dynamicsWorld->addRigidBody(testBody.get());
+        dynamicsWorld->addRigidBody(testBody2.get());
+        dynamicsWorld->addRigidBody(testBody3.get());
+        dynamicsWorld->addConstraint(constraint1.get(), true);
+    }
+
+    // -- Vehicle ----------
+
+    btTransform vehicleTransform;
+    vehicleTransform.setIdentity();
+    vehicleTransform.setOrigin({0, 0, -3});
+    sim::Vehicle1::Vehicle1Settings settings;
+    sim::Vehicle1 vehicle(dynamicsWorld.get(), vehicleTransform, settings);
 
     // -------------------------------------------------
 
     auto projection =
-        Matrixf::Scale(.5, .5, .5) * Matrixf::Translation(0, 0, -.8f) *
+        Matrixf::Scale(.5, .5, .5) * Matrixf::Translation(0, 0, -.1f) *
         Matrixf::Scale(
             static_cast<float>(height) / static_cast<float>(width), 1, 1);
 
     projection.w3 = .5;
 
+    double x = 0, y = 0;
+    double scale = 2;
+
     window.frameUpdate.connect([&](double t) {
         static double phase = 0;
 
-        dynamicsWorld->stepSimulation(static_cast<float>(t));
+        dynamicsWorld->stepSimulation(static_cast<btScalar>(t));
 
         phase += .01;
 
-        Matrixf transform;
+        Matrixd transform;
         testBody->getWorldTransform().getOpenGLMatrix(&transform.x1);
 
-        auto viewTransform =
-            Matrixf::RotationX(pi / 2.).scale(.05f, .05f, .05f) *
-            Matrixf::Translation(-transform.row(3));
-
-        sim::renderBox(transform, viewTransform, projection);
-
-        testBody2->getWorldTransform().getOpenGLMatrix(&transform.x1);
-        sim::renderBox(transform, viewTransform, projection);
-
-        testBody3->getWorldTransform().getOpenGLMatrix(&transform.x1);
-        transform = transform * Matrixf::RotationX(pi / 2.);
-        sim::renderCylinder(transform, viewTransform, projection);
+        auto viewTransform = Matrixf::RotationX(pi / 2. + .8 + y) *
+                             Matrixf::RotationZ(x * 2) *
+                             Matrixf::Scale(.05f * scale); // *
+        //                             Matrixf::Translation(-transform.row(3));
 
         groundBody->getWorldTransform().getOpenGLMatrix(&transform.x1);
         sim::renderBox(transform.scale(50, 50, 50), viewTransform, projection);
 
-        //        sim::renderBox(
-        //            Matrixf::RotationZ(phase).rotate(phase, Vec(1,
-        //            1).normalize()), Matrixf(), Matrixf::Scale(.5));
+        vehicle.render(viewTransform, projection);
 
-        //        sim::renderCylinder(
-        //            Matrixf::RotationZ(phase).rotate(-phase, Vec(1,
-        //            1).normalize()), Matrixf(), Matrixf::Scale(.5));
+        if (enableBasicTestShapes) {
+            sim::renderBox(transform, viewTransform, projection);
+
+            testBody2->getWorldTransform().getOpenGLMatrix(&transform.x1);
+            sim::renderBox(transform, viewTransform, projection);
+
+            testBody3->getWorldTransform().getOpenGLMatrix(&transform.x1);
+            transform = transform * Matrixf::RotationX(pi / 2.);
+            sim::renderCylinder(transform, viewTransform, projection);
+            //        sim::renderBox(
+            //            Matrixf::RotationZ(phase).rotate(phase, Vec(1,
+            //            1).normalize()), Matrixf(), Matrixf::Scale(.5));
+
+            //        sim::renderCylinder(
+            //            Matrixf::RotationZ(phase).rotate(-phase, Vec(1,
+            //            1).normalize()), Matrixf(), Matrixf::Scale(.5));
+        }
+
+        auto mouseBoxTransform =
+            Matrixf::Identity() * Matrixf::Translation(x * 20., y * 20., -1);
+        sim::renderBox(mouseBoxTransform, viewTransform, projection);
 
         cout << transform.z4 << endl;
     });
+
+    window.pointerMoved.connect([&](View::PointerArgument arg) {
+        x = arg.x / width * 2 - 1;
+        y = arg.y / height * 2 - 1;
+    });
+
+    window.scroll.connect(
+        [&](View::ScrollArgument arg) { scale *= (arg.y / 10 + 1); });
 
     app.mainLoop();
 

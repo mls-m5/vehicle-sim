@@ -124,6 +124,22 @@ public:
 
 std::unique_ptr<CylinderModel> cylinderModel;
 
+// clang-format off
+const Matrixf centerXRotation (
+        0, 0,-1, 0,
+        0, 1, 0, 0,
+        1, 0, 0, 0,
+        0, 0, 0, 1
+        );
+
+const Matrixf centerYRotation (
+        1, 0, 0, 0,
+        0, 0, 1, 0,
+        0,-1, 0, 0,
+        0, 0, 0, 1
+        );
+// clang-format on
+
 } // namespace
 
 namespace sim {
@@ -137,4 +153,17 @@ void renderCylinder(const Matrixf &model,
     cylinderModel->render(view * model, projection);
 }
 
+void renderCylinderY(const Matrixf &model,
+                     const Matrixf &view,
+                     const Matrixf &projection) {
+    auto nModel = model * centerYRotation;
+    renderCylinder(nModel, view, projection);
+}
+
+void renderCylinderX(const Matrixf &model,
+                     const Matrixf &view,
+                     const Matrixf &projection) {
+    auto nModel = model * centerXRotation;
+    renderCylinder(nModel, view, projection);
+}
 } // namespace sim

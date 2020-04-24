@@ -1,7 +1,7 @@
 # Matmake file
 # https://github.com/mls-m5/matmake
 
-define += USE_DOUBLE_PRECISION
+define += BT_USE_DOUBLE_PRECISION
 
 // ------- Bullet physics ------------------------------------
 
