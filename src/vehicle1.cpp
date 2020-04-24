@@ -44,22 +44,24 @@ struct Vehicle1::Wheel {
                      mainBody,
                      btVector3(0, 0, 0),
                      center - mainBody.getWorldTransform().getOrigin(),
-                     btVector3(1, 0, 0),
-                     btVector3(1, 0, 0))
+                     btVector3(-1, 0, 0),
+                     btVector3(-1, 0, 0))
         , radius(radius)
         , width(width) {
         btTransform transform;
         transform.setIdentity();
-        //        transform.setBasis({{0, 1, 0},  //
-        //                            {-1, 0, 0}, //
-        //                            {0, 0, 1}});
         transform.setOrigin(center);
         body.setWorldTransform(transform);
 
         world->addRigidBody(&body);
         world->addConstraint(&constraint);
 
-        constraint.enableAngularMotor(true, 1, 1);
+        body.setFriction(10);
+        body.setActivationState(DISABLE_DEACTIVATION);
+    }
+
+    void throttle(double value) {
+        constraint.enableAngularMotor(true, value, 1);
     }
 
     ~Wheel() {
@@ -139,7 +141,7 @@ Vehicle1::Vehicle1(btDynamicsWorld *world,
 
         world->addConstraint(waistJoint.get());
 
-        waistJoint->enableAngularMotor(true, 1, 1);
+        waistJoint->enableAngularMotor(true, .1, 1);
     }
 
     for (int i : {-1, 1}) {
@@ -167,6 +169,9 @@ Vehicle1::Vehicle1(btDynamicsWorld *world,
             s.wheelRadius,
             s.wheelHalfWidth));
     }
+
+    frontBody->setActivationState(DISABLE_DEACTIVATION);
+    rearBody->setActivationState(DISABLE_DEACTIVATION);
 }
 
 Vehicle1::~Vehicle1() {
@@ -188,6 +193,16 @@ void Vehicle1::render(Matrixf view, Matrixf projection) {
 
     for (auto &wheel : wheels) {
         wheel->render(view, projection);
+    }
+}
+
+void Vehicle1::steering(double value) {
+    waistJoint->enableAngularMotor(true, value * settings.steeringScaling, 10);
+}
+
+void Vehicle1::throttle(double value) {
+    for (auto &wheel : wheels) {
+        wheel->throttle(value * settings.throttleScaling);
     }
 }
 

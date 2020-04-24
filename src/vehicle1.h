@@ -18,7 +18,7 @@ class Vehicle1 {
 
 public:
     struct Vehicle1Settings {
-        double wheelRadius = 1;
+        double wheelRadius = 1.5;
         double wheelHalfWidth = .5;
         double bodyHalfWidth = 1.5;
         double bodyHalfHeight = 1;
@@ -34,6 +34,9 @@ public:
         double frontWheight = 1;
         double rearWheight = 1;
         double wheelWheigt = .2;
+
+        double throttleScaling = 4;
+        double steeringScaling = 2;
     };
 
     Vehicle1(btDynamicsWorld *,
@@ -43,6 +46,10 @@ public:
     ~Vehicle1();
 
     void render(Matrixf view, Matrixf projection);
+
+    void steering(double value);
+
+    void throttle(double value);
 
     std::unique_ptr<btRigidBody> frontBody;
     std::unique_ptr<btRigidBody> rearBody;

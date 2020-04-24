@@ -5,6 +5,7 @@
 
 #include "matgui/application.h"
 #include "matgui/draw.h"
+#include "matgui/keys.h"
 #include "matgui/window.h"
 
 #include "assets.h"
@@ -61,7 +62,7 @@ int main(int argc, char **argv) {
                                              solver.get(),
                                              collisionConfiguration.get());
 
-    dynamicsWorld->setGravity(btVector3(0, 0, -10));
+    dynamicsWorld->setGravity(btVector3(0, 0, -100));
 
     // -- shopes etc
 
@@ -144,9 +145,14 @@ int main(int argc, char **argv) {
 
     double x = 0, y = 0;
     double scale = 2;
+    double steering = 0;
+    double throttle = 0;
 
     window.frameUpdate.connect([&](double t) {
         static double phase = 0;
+
+        vehicle.steering(steering);
+        vehicle.throttle(throttle);
 
         dynamicsWorld->stepSimulation(static_cast<btScalar>(t));
 
@@ -197,6 +203,48 @@ int main(int argc, char **argv) {
 
     window.scroll.connect(
         [&](View::ScrollArgument arg) { scale *= (arg.y / 10 + 1); });
+
+    window.keyDown.connect([&](View::KeyArgument arg) {
+        if (arg.repeats == 0) {
+            switch (arg.scanCode) {
+            case Keys::W:
+                throttle += 1;
+                break;
+
+            case Keys::S:
+                throttle -= 1;
+                break;
+
+            case Keys::A:
+                steering = -1;
+                break;
+
+            case Keys::D:
+                steering = 1;
+                break;
+            }
+        }
+    });
+
+    window.keyUp.connect([&](View::KeyArgument arg) {
+        switch (arg.scanCode) {
+        case Keys::W:
+            throttle -= 1;
+            break;
+
+        case Keys::S:
+            throttle += 1;
+            break;
+
+        case Keys::A:
+            steering = 0;
+            break;
+
+        case Keys::D:
+            steering = 0;
+            break;
+        }
+    });
 
     app.mainLoop();
 
