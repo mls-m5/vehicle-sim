@@ -35,7 +35,7 @@ const std::string plainFragmentCode =
         out vec4 fragColor;
 
         void main() {
-            float intensity = .5 + fNormal.y / 2;
+            float intensity = .5 + fNormal.y / 2.;
             fragColor = vec4(intensity, intensity, intensity, 1);
         }
 

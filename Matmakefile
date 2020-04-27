@@ -3,7 +3,7 @@
 
 define += BT_USE_DOUBLE_PRECISION
 
-// ------- Bullet physics ------------------------------------
+# ------- Bullet physics ------------------------------------
 
 bullet.includes =
     bullet3/src
@@ -17,7 +17,7 @@ bullet.out = shared bullet
 
 bullet.flags = -w
 
-// --------- Main program ------------------------------------
+# --------- Main program ------------------------------------
 
 config +=
    c++17 Wall
@@ -33,11 +33,31 @@ main.includes +=
 
 main.src =
     src/*.cpp
-    matengine/src/*.cpp
+    #matengine/src/*.cpp
     matengine/matgui/src/*.cpp
     bullet3/src/LinearMath/**.cpp
 
 main.link = bullet
 
 main.libs += -lGL -lSDL2 -lSDL2_image
+
+
+# -----
+main_em.includes +=
+    include
+    matengine/include
+    matengine/matgui/include
+    bullet3/src
+main_em.cpp = em++
+main_em.dir = em
+main_em.flags =
+    -s USE_SDL=2 -s FULL_ES2=1 -s USE_WEBGL2=1 -s USE_SDL_IMAGE=2
+    -g4
+main_em.out = vehicle.html
+main_em.src +=
+    bullet3/src/btBulletCollisionAll.cpp
+    bullet3/src/btBulletDynamicsAll.cpp
+    bullet3/src/btLinearMathAll.cpp
+    src/*.cpp
+    matengine/matgui/src/*.cpp
 

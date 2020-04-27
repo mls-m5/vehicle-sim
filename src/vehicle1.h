@@ -25,6 +25,10 @@ public:
         double rearBodyHalfLength = 2;
         double frontBodyHalfLength = 1.5;
 
+        double bucketHalfWidth = bodyHalfWidth + wheelHalfWidth * 2;
+        double bucketHalfHeight = bodyHalfHeight;
+        double bucketHalfLength = 2;
+
         double centerJointOffset = 1.5;
 
         double axisZOffset = -.5;
@@ -53,6 +57,7 @@ public:
 
     std::unique_ptr<btRigidBody> frontBody;
     std::unique_ptr<btRigidBody> rearBody;
+    std::unique_ptr<btRigidBody> bucketBody;
 
     std::unique_ptr<btHingeConstraint> waistJoint;
 

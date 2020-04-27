@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
     btTransform groundTransform;
     groundTransform.setIdentity();
-    groundTransform.setOrigin(btVector3(0, 0, -50));
+    groundTransform.setOrigin(btVector3(0, 0, -51));
 
     auto groundBody = createRigidBody(0, groundShape.get());
     groundBody->setWorldTransform(groundTransform);
@@ -189,9 +189,11 @@ int main(int argc, char **argv) {
             //            1).normalize()), Matrixf(), Matrixf::Scale(.5));
         }
 
-        auto mouseBoxTransform =
-            Matrixf::Identity() * Matrixf::Translation(x * 20., y * 20., -1);
-        sim::renderBox(mouseBoxTransform, viewTransform, projection);
+        if (false) {
+            auto mouseBoxTransform = Matrixf::Identity() *
+                                     Matrixf::Translation(x * 20., y * 20., -1);
+            sim::renderBox(mouseBoxTransform, viewTransform, projection);
+        }
 
         cout << transform.z4 << endl;
     });

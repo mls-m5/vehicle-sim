@@ -97,8 +97,6 @@ Vehicle1::Vehicle1(btDynamicsWorld *world,
                    Vehicle1::Vehicle1Settings s)
     : settings(s) {
 
-    //    auto centerHeight = s.axisZOffset + s.wheelRadius;
-
     auto centerPosition = centerGround.getOrigin() +
                           btVector3(0, 0, s.axisZOffset + s.wheelRadius);
 
@@ -140,8 +138,6 @@ Vehicle1::Vehicle1(btDynamicsWorld *world,
             btVector3(0, 0, 1));
 
         world->addConstraint(waistJoint.get());
-
-        waistJoint->enableAngularMotor(true, .1, 1);
     }
 
     for (int i : {-1, 1}) {
